@@ -69,12 +69,25 @@ myApp.controller('MainController', ["$scope", "$location", "$rootScope", "Module
 }])
 
 // Staging Area
-myApp.controller('StagingAreaController', ["$scope", "$location", "$rootScope", "ModuleService", "UsersService", function($scope, $location, $rootScope, ModuleService, UsersService) {
+myApp.controller('StagingAreaController', ["$scope", "$location", "ModuleService", "UsersService" , "$window",  function($scope, $location, ModuleService, UsersService,$window) {
     $scope.text = "stagingArea page"
     $scope.loggedInUser = UsersService.getLoggedInUser();
     ModuleService.getAllModules().success(function(modules) {
         $scope.modules = modules
     })
+
+    $scope.deleteModule = function(id) {
+    	var module={
+    		id : id
+    	}
+
+        var confirm = $window.confirm("Are you sure you want to delete this module")
+        if (confirm) {
+            deleteModule(module)
+            window.location.reload();
+        }
+
+    }
 }])
 
 
@@ -109,7 +122,7 @@ myApp.controller('CreateModuleController', ["$scope", "$location", "$rootScope",
 
 }])
 
-myApp.controller('ModuleDetailsController', ["$scope", "$location", "$rootScope", "ModuleService", '$routeParams', '$http', "UsersService", 'Upload', function($scope, $location, $rootScope, ModuleService, $routeParams, $http, UsersService, Upload) {
+myApp.controller('ModuleDetailsController', ["$scope", "$location", "$rootScope", "ModuleService", '$routeParams', '$http', "UsersService", 'Upload', '$window', function($scope, $location, $rootScope, ModuleService, $routeParams, $http, UsersService, Upload, $window) {
 
     var loggedInUser = UsersService.getLoggedInUser();
     $scope.loggedInUser = loggedInUser;
@@ -165,35 +178,39 @@ myApp.controller('ModuleDetailsController', ["$scope", "$location", "$rootScope"
                 }).then(function(res) {
                     $scope.studentsList = res.data
                 })
-        })
-
-    $http.get('/api/modules/getMyModules/' + loggedInUser.id)
-        .success(function(res) {
-            var module = $scope.module
-            var currentSections = []
-            module.sections.forEach(function(res) {
-                currentSections.push(res.sectionDetails._id)
-            })
-            $scope.mySections = []
-            res.forEach(function(dataItem) {
-                if (dataItem._id != $routeParams.id) {
-                    dataItem.sections.forEach(function(sectionItem) {
-                        if (currentSections.indexOf(sectionItem.sectionDetails._id) == -1) {
-                            var newSection = sectionItem
-                            newSection.moduleName = dataItem.name
-                            $scope.mySections.push(newSection)
-                        }
+        }).then(function() {
+            if (loggedInUser.role == "lecture") {
+                $http.get('/api/modules/getMyModules/' + loggedInUser.id)
+                    .success(function(res) {
+                        var module = $scope.module
+                        var currentSections = []
+                        module.sections.forEach(function(res) {
+                            currentSections.push(res.sectionDetails._id)
+                        })
+                        $scope.mySections = []
+                        res.forEach(function(dataItem) {
+                            if (dataItem._id != $routeParams.id) {
+                                dataItem.sections.forEach(function(sectionItem) {
+                                    if (currentSections.indexOf(sectionItem.sectionDetails._id) == -1) {
+                                        var newSection = sectionItem
+                                        newSection.moduleName = dataItem.name
+                                        $scope.mySections.push(newSection)
+                                    }
+                                })
+                            }
+                        })
                     })
-                }
-            })
+            }
         })
 
 
 
 
-    $scope.addSection = function() {
-        $scope.newSection.moduleId = $routeParams.id
-        addSection($scope.newSection)
+
+    $scope.addSection = function(newSection) {
+        console.log(newSection)
+        newSection.moduleId = $routeParams.id
+        addSection(newSection)
         window.location.reload();
     }
 
@@ -301,6 +318,17 @@ myApp.controller('ModuleDetailsController', ["$scope", "$location", "$rootScope"
         removeStudent(studentDetails)
     }
 
+    $scope.deleteSection = function(id) {
+        var sectionDetails = {
+            moduleId: $routeParams.id,
+            sectionId: id
+        }
+        var confirm = $window.confirm("Are you sure you want to delete this section")
+        if (confirm) {
+            deleteSection(sectionDetails)
+            window.location.reload();
+        }
+    }
 
 
 }])
@@ -348,16 +376,25 @@ myApp.factory('ModuleService', ['$http', '$rootScope', "$location", "UsersServic
         $http.post('/api/modules/removeStudent', studentDetails)
     }
 
+    deleteSection = function(sectionDetails) {
+        console.log(sectionDetails)
+        $http.post('/api/modules/removeSection', sectionDetails)
+    }
+
+    deleteModule = function(id) {
+        $http.post('/api/modules/deleteModule', id)
+    }
+
     var api = {
         getAllStudnets: function() {
             return $http.get('/api/users/studnets')
         },
         getAllModules: function() {
             return $http.get('/api/modules/', {
-            headers: {
-                Authorization: 'Bearer ' + UsersService.getTokenApi()
-            }
-        })
+                headers: {
+                    Authorization: 'Bearer ' + UsersService.getTokenApi()
+                }
+            })
         }
 
     }
@@ -431,8 +468,10 @@ myApp.factory('UsersService', ['$http', '$window', '$rootScope', function($http,
     isLoggedIn = function() {
         var token = getToken();
         var payload;
-
-        if (token != null) {
+        if (token === "undefined") {
+            console.log("bad token")
+            return false
+        } else if (token != null && token != "") {
             payload = token.split('.')[1];
             payload = $window.atob(payload);
             payload = JSON.parse(payload);

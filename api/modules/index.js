@@ -17,6 +17,8 @@
   router.post('/hideSection', controller.hideSection)
   router.post('/enrollStudent', controller.enrollStudent)
   router.post('/removeStudent', controller.removeStudent)
+  router.post('/removeSection', controller.removeSection)
+  router.post('/deleteModule', controller.deleteModule)
 
 
 

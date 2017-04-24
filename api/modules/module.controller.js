@@ -31,9 +31,7 @@ exports.index = function(req, res) {
             }
             return res.json(200, modules);
         });
-
     }
-
 };
 
 // Creates a new user in datastore.
@@ -56,7 +54,6 @@ exports.create = function(req, res) {
 
         return res.json(201, module);
     })
-
 };
 
 
@@ -87,15 +84,12 @@ exports.destroy = function(req, res) {
 
 
 exports.getModule = function(req, res) {
-
     Module.findOne({ _id: req.params.id }).populate('sections.sectionDetails').lean().exec(function(err, docs) {
         if (err) {
             return handleError(docs, err);
         }
         return res.status(200).json(docs)
     })
-
-
 }
 
 getSection = function(input) {
@@ -107,9 +101,7 @@ getSection = function(input) {
                 return handleError(docs, err);
             }
             return docs
-
         })
-
 }
 
 
@@ -118,7 +110,6 @@ exports.addSection = function(req, res) {
     var module
     var sectionId
     var filesList = []
-
     if (req.body.files != null) {
         filesList = req.body.files
     }
@@ -128,16 +119,12 @@ exports.addSection = function(req, res) {
         }
         module = resModule
     }).then(function(res) {
-
-
         var newSection = {
             name: req.body.name,
             info: req.body.info,
             files: filesList,
             linked: true
         };
-
-
         Section.create(newSection, function(err, resSection) {
             if (err) {
                 console.log(err)
@@ -145,8 +132,6 @@ exports.addSection = function(req, res) {
             } else {
                 sectionId = resSection._id
             }
-
-
         }).then(function(argument) {
             Module.findOneAndUpdate({ _id: req.body.moduleId }, {
                     $push: {
@@ -163,17 +148,12 @@ exports.addSection = function(req, res) {
                     }
                     return 'Update successful'
                 });
-
         })
-
     })
-
-
 };
 
 
 exports.getMyModules = function(req, res) {
-
     Module.find({ lecture: req.params.id }).populate('sections.sectionDetails').lean().exec(function(err, docs) {
         if (err) {
             console.log(err)
@@ -218,7 +198,6 @@ exports.importSections = function(req, res) {
 
 
 exports.unlinkSection = function(req, res) {
-    console.log(req.body)
     var newSectionId;
     var newSection
     var count = 0
@@ -244,15 +223,11 @@ exports.unlinkSection = function(req, res) {
         }
     }).then(function() {
         if (count > 1) {
-            console.log("the new section is", newSection)
-
             Section.create(newSection, function(err, resNewSection) {
                 if (err) { handleError(res, err) } else {
-                    console.log('New section made:', resNewSection)
                     newSectionId = resNewSection._id
                 }
             }).then(function() {
-                console.log("The new ID is ", newSectionId)
                 Module.findOneAndUpdate({ _id: req.body.module_id, "sections.sectionDetails": req.body.id }, {
                         $set: {
                             "sections.$.sectionDetails": newSectionId
@@ -274,8 +249,6 @@ exports.unlinkSection = function(req, res) {
 
 
 exports.showSection = function(req, res) {
-    console.log(req.body)
-
     Module.findOneAndUpdate({ _id: req.body.moduleId, "sections._id": req.body.sectionId, "sections.hidden": true }, {
             $set: {
                 "sections.$.hidden": false
@@ -293,8 +266,6 @@ exports.showSection = function(req, res) {
 
 
 exports.hideSection = function(req, res) {
-    console.log(req.body)
-
     Module.findOneAndUpdate({ _id: req.body.moduleId, "sections._id": req.body.sectionId, "sections.hidden": false }, {
             $set: {
                 "sections.$.hidden": true
@@ -312,8 +283,6 @@ exports.hideSection = function(req, res) {
 
 
 exports.enrollStudent = function(req, res) {
-    console.log(req.body)
-
     Module.findOneAndUpdate({ _id: req.body.moduleId }, { $push: { students: req.body.studentId } }, { safe: true, upsert: true },
         function(err, output) {
             if (err) {
@@ -325,8 +294,6 @@ exports.enrollStudent = function(req, res) {
 
 
 exports.removeStudent = function(req, res) {
-    console.log(req.body)
-
     Module.findOneAndUpdate({ _id: req.body.moduleId }, { $pull: { students: req.body.studentId } }, { safe: true, upsert: true },
         function(err, output) {
             if (err) {
@@ -334,4 +301,32 @@ exports.removeStudent = function(req, res) {
             }
             return res.status(200).json("update successful")
         });
+}
+
+
+exports.removeSection = function(req, res) {
+    console.log("req.body", req.body)
+
+    Module.findOneAndUpdate({ _id: req.body.moduleId }, { $pull: { sections: { _id: mongoose.Types.ObjectId(req.body.sectionId) } } }, { safe: true, upsert: true },
+        function(err, output) {
+            console.log("output", output)
+            console.log("err", err)
+            if (err) {
+                return handleError(res, err);
+            }
+            return res.status(200).json("update successful")
+        });
+
+}
+
+exports.deleteModule = function(req, res){
+
+    Module.remove({_id : req.body.id}, function(err, output){
+        console.log(err)
+        if(err){
+            handleError(res, err)
+        }else{
+            return res.status(200).json("module deleted")
+        }
+    })
 }

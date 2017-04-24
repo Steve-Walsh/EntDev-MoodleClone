@@ -1,14 +1,16 @@
 <div class="container-fluid">
+    <h1 style="text-align: center"> {{module.name}}</h1>
+    <br>
     <div class="btn-group pull-right" ng-if="module.lecture == loggedInUser.id">
         <button type="button" ng-if="edit" class="btn btn-default btn-sm btn-space" ng-click="setEdit(false)">Finish</button>
         <button type="button" ng-if="!edit" class="btn btn-default btn-sm btn-space" ng-click="setEdit(true)">Edit</button>
         <button type="button" ng-if="studentView == 'lecture'" class="btn btn-default btn-sm btn-space" ng-click="setStudentView('student')">Student</button>
         <button type="button" ng-if="studentView == 'student'" class="btn btn-default btn-sm btn-space" ng-click="setStudentView('lecture')">Lecture</button>
-        <a class="btn btn-sm btn-primary btn-space" data-toggle="collapse" data-target="#importSections ">Import Sections</a>
-        <a class="btn btn-sm btn-primary btn-space" data-toggle="collapse" data-target="#newSection ">Add New Sections</a>
-        <a class="btn btn-sm btn-primary btn-space" data-toggle="collapse" data-target="#enrollStudent ">Enroll/Remove Student</a>
+        <a class="btn btn-sm btn-primary btn-space" data-toggle="collapse" data-target="#importSections">Import Sections</a>
+        <a class="btn btn-sm btn-primary btn-space" data-toggle="collapse" data-target="#newSectionDropDown">Add New Sections</a>
+        <a class="btn btn-sm btn-primary btn-space" data-toggle="collapse" data-target="#enrollStudent">Enroll/Remove Student</a>
     </div>
-    <br> {{loggedInUser}}
+    <br>
     <p></p>
     <div ng-if="loggedInUser.role == 'lecture'">
         <div class="row">
@@ -16,6 +18,7 @@
                 <div ng-repeat="section in module.sections | orderBy:'locNum'">
                     <div class="panel panel-primary">
                         <div class="btn-group pull-right" ng-if="module.lecture == loggedInUser.id && edit ">
+                            <a class="btn btn-danger  btn-sm btn-space" ng-click="deleteSection(section._id)">Delete</a>
                             <a class="btn btn-danger  btn-sm btn-space" ng-click="hideSec(section._id)" ng-show="!section.hidden">Hide</a>
                             <a class="btn btn-primary btn-sm btn-space" ng-click="showSec(section._id)" ng-show="section.hidden">Show</a>
                             <a class="btn btn-warning btn-sm btn-space" ng-click="unlink(section.sectionDetails._id)"> Unlink</a>
@@ -76,7 +79,7 @@
                 </div>
             </div>
         </div>
-        <div id="newSection" class="collapse">
+        <div id="newSectionDropDown" class="collapse">
             <div class="col-md-12">
                 <div class="panel panel-success">
                     <div class="panel-heading">
@@ -85,7 +88,7 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <form ng-submit="addSection()">
+                        <form ng-submit="addSection(newSection)">
                             <div class="form-group form-inline">
                                 <label>Name: </label>
                                 <input type="text" name="name" class="form-control" ng-model="newSection.name" required>
@@ -109,7 +112,7 @@
                                 </div>
                             </div>
                             <br>
-                            <button class="btn btn-lg btn-primary btn-block" type="submit">Create new Module</button>
+                            <button class="btn btn-lg btn-primary btn-block" type="submit">Create new Section</button>
                         </form>
                     </div>
                 </div>
@@ -176,57 +179,52 @@
     </div>
     <div id="enrollStudent" class="collapse">
         <div class="col-md-12">
-            <form>
-                <div class="panel panel-success">
-                    <div class="panel-heading">
-                        <div class="panel-title">
-                            <h4>Enroll Students</h4>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-xs-3 pull-right">
-                                <label>Show</label>
-                                <select ng-model="numLimit">
-                                    <div class="form-control input-sm">
-                                        <option selected="selected" value="5">5</option>
-                                        <option value="10">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                    </div>
-                                </select>
-                            </div>
-                            <div class="col-xs-4">
-                                <input type="text" class="form-control" placeholder="Search " ng-model="searchStudent">
-                            </div>
-                        </div>
-                        <hr>
-                        <table class="table table-striped table-bordered table-hover" cellspacing="0" width="100%" class="posts">
-                            <thead>
-                                <tr>
-                                    <th>Student Name</th>
-                                    <th>Student Login</th>
-                                    <th>Add/Remove</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="data in studentsList | filter:searchStudent | orderBy:orderProp | limitTo:quantity">
-                                    <td>{{data.name}}</td>
-                                    <td>{{data.email}}</td>
-                                    <td>
-                                        <a ng-if="data.enrolled == true " class="btn btn-danger btn-xs btn-space" ng-click="removeStudent(data._id)">Remove</a>
-                                        <a ng-if="data.enrolled == false " class="btn btn-primary btn-xs btn-space" ng-click="enrollStudent(data._id)">Enroll</a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="panel-footer">
-                        <button class="btn btn-lg btn-primary btn-block" type="submit" ng-click="importSection()">Import Section</button>
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <div class="panel-title">
+                        <h4>Enroll Students</h4>
                     </div>
                 </div>
-            </form>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-xs-3 pull-right">
+                            <label>Show</label>
+                            <select ng-model="numLimit">
+                                <div class="form-control input-sm">
+                                    <option selected="selected" value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </div>
+                            </select>
+                        </div>
+                        <div class="col-xs-4">
+                            <input type="text" class="form-control" placeholder="Search " ng-model="searchStudent">
+                        </div>
+                    </div>
+                    <hr>
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" width="100%" class="posts">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Student Login</th>
+                                <th>Add/Remove</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="data in studentsList | filter:searchStudent | orderBy:orderProp | limitTo:quantity">
+                                <td>{{data.name}}</td>
+                                <td>{{data.email}}</td>
+                                <td>
+                                    <a ng-if="data.enrolled == true " class="btn btn-danger btn-xs btn-space" ng-click="removeStudent(data._id)">Remove</a>
+                                    <a ng-if="data.enrolled == false " class="btn btn-primary btn-xs btn-space" ng-click="enrollStudent(data._id)">Enroll</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -234,7 +232,7 @@
 <!-- Student View  -->
 <div class="col-md-12" ng-if="loggedInUser.role == 'student'">
     <div ng-repeat="section in module.sections | orderBy:'locNum'">
-        <div class="panel panel-primary" ng-if="section.public">
+        <div class="panel panel-primary" ng-if="!section.hidden">
             <div class="panel-heading">
                 <h1 class="panel-title">{{section.sectionDetails.name}}</h1>
             </div>
