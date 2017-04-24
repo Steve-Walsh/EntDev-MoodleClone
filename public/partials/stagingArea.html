@@ -1,0 +1,40 @@
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12"	>
+<!-- 			<div class="panel panel-primary">
+				<div class="panel-heading"><b>Panel</b></div>
+				<div class="panel-body">
+					<b>Hello: {{text}}</b>
+				</div>
+
+
+			</div> -->
+
+			<div ng-repeat="module in modules | orderBy:'+name'">
+				<div class="panel panel-primary">
+					<div class="panel-heading">
+<!-- 						<div class="btn-group pull-right" ng-if="event.adminId == loggedInUser._id">
+							<a class="btn btn-danger  btn-xs" ng-click="hide(module._id)" ng-show="!module.hidden"> Hide</a>
+							<a class="btn btn-success btn-xs" ng-click="show(module._id)" ng-show="module.hidden"> Show</a>
+						</div> -->
+						<h1 class="panel-title" > 
+							<a href="#/module/{{module._id}}">{{module.name}}</a></h1>
+
+						</div>
+						<div class="panel-body">
+							Sections:
+							<hr>
+							<ul>
+							<div ng-repeat="section in module.sections | orderBy:'+name'">
+
+								<li ng-if="section.public || loggedInUser.id == module.lecture">{{section.sectionDetails.name}}  : 	{{section.sectionDetails.info}}		
+								<br>
+							</div>
+							</li>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
