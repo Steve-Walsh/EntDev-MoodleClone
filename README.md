@@ -14,4 +14,4 @@ $ cd EntMoodle
 $ npm install
 $ npm start
 ```
-MIT © [Stephen Walsh](https://github.com/Steve-Walsh/EntMoodle/blob/master/LICENSE)
+MIT © [Stephen Walsh](https://github.com/Steve-Walsh/EntMoodle/blob/master/licence)
