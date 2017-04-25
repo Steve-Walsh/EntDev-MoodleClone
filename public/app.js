@@ -3,73 +3,76 @@ var myApp = angular.module('myApp', ['ngRoute', 'ngFileUpload']);
 
 
 myApp.config(['$routeProvider',
-    function($routeProvider) {
-        $routeProvider
-            .when('/', {
-                templateUrl: 'partials/stagingArea.html',
-                controller: 'StagingAreaController'
-            })
-            .when('/module', {
-                templateUrl: 'partials/module_home.html',
-                controller: 'ModuleController'
-            })
-            .when('/course', {
-                templateUrl: 'partials/course_home.html',
-                controller: 'CourseController'
-            })
-            .when('/login', {
-                templateUrl: 'partials/login.html',
-                controller: 'UsersController'
-            })
-            .when('/signup', {
-                templateUrl: 'partials/register.html',
-                controller: 'UsersController'
-            })
-            .when('/createModule', {
-                templateUrl: '/partials/createModule.html',
-                controller: 'CreateModuleController'
-            })
-            .when('/module/:id', {
-                templateUrl: '/partials/module_details.html',
-                controller: 'ModuleDetailsController'
-            })
-            .otherwise({
-                redirectTo: "/"
-            })
-    }
-])
-
-// .run(function($rootScope, $location)  {
-// 	$rootScope.$on('$routeChangeStart', function(event, nextRoute, currentRoute) {
-// 		if ($location.path() != "/login")
-// 		{
-// 			if($rootScope.loggedInUser == null) {
-// 				$location.path('/login');
-// 			}
-// 		}
-// 	});
-// })
+        function($routeProvider) {
+            $routeProvider
+                .when('/', {
+                    templateUrl: 'partials/stagingArea.html',
+                    controller: 'StagingAreaController'
+                })
+                .when('/module', {
+                    templateUrl: 'partials/module_home.html',
+                    controller: 'ModuleController'
+                })
+                .when('/course', {
+                    templateUrl: 'partials/course_home.html',
+                    controller: 'CourseController'
+                })
+                .when('/login', {
+                    templateUrl: 'partials/login.html',
+                    controller: 'UsersController'
+                })
+                .when('/register', {
+                    templateUrl: 'partials/register.html',
+                    controller: 'UsersController'
+                })
+                .when('/createModule', {
+                    templateUrl: '/partials/createModule.html',
+                    controller: 'CreateModuleController'
+                })
+                .when('/module/:id', {
+                    templateUrl: '/partials/module_details.html',
+                    controller: 'ModuleDetailsController'
+                })
+                .otherwise({
+                    redirectTo: "/"
+                })
+        }
+    ])
+    .run(function($rootScope, $location, UsersService) {
+        $rootScope.$on('$routeChangeStart', function(event, nextRoute, currentRoute) {
+            UsersService.isLoggedInApi();
+            if ($location.path() != "/login") {
+                if ($location.path() != "/register") {
+                    if (!$rootScope.loggedInUser) {
+                        $location.path('/login');
+                    }
+                }
+            }
+        });
+    })
 
 //Main
 
-myApp.controller('MainController', ["$scope", "$location", "$rootScope", "ModuleService", "UsersService", function($scope, $location, $rootScope, ModuleService, UsersService) {
+myApp.controller('MainController', ["$scope", "$location", "$rootScope", "ModuleService", "UsersService" , '$window', function($scope, $location, $rootScope, ModuleService, UsersService, $window) {
     $scope.loggedInUser = UsersService.getLoggedInUser();
-    console.log($scope.loggedInUser)
 
-    ModuleService.getAllModules().success(function(modules) {
-        $scope.modules = modules
-        console.log(modules)
-    })
+    if (UsersService.getLoggedInUser()) {
+
+        ModuleService.getAllModules().success(function(modules) {
+            $scope.modules = modules
+        })
+
+    }
 
     $scope.logout = function() {
-        console.log("logout called")
         UsersService.logout()
+        $window.location.reload()
 
     }
 }])
 
 // Staging Area
-myApp.controller('StagingAreaController', ["$scope", "$location", "ModuleService", "UsersService" , "$window",  function($scope, $location, ModuleService, UsersService,$window) {
+myApp.controller('StagingAreaController', ["$scope", "$location", "ModuleService", "UsersService", "$window", function($scope, $location, ModuleService, UsersService, $window) {
     $scope.text = "stagingArea page"
     $scope.loggedInUser = UsersService.getLoggedInUser();
     ModuleService.getAllModules().success(function(modules) {
@@ -77,9 +80,9 @@ myApp.controller('StagingAreaController', ["$scope", "$location", "ModuleService
     })
 
     $scope.deleteModule = function(id) {
-    	var module={
-    		id : id
-    	}
+        var module = {
+            id: id
+        }
 
         var confirm = $window.confirm("Are you sure you want to delete this module")
         if (confirm) {
@@ -94,32 +97,23 @@ myApp.controller('StagingAreaController', ["$scope", "$location", "ModuleService
 //Module
 myApp.controller('ModuleController', ["$scope", "$location", "$rootScope", "UsersService", function($scope, $location, $rootScope, UsersService) {
     $scope.loggedInUser = UsersService.getLoggedInUser();
-    console.log("main", $scope.loggedInUser)
-    $scope.text = "module page"
 
 }])
 
-myApp.controller('CreateModuleController', ["$scope", "$location", "$rootScope", "ModuleService", "UsersService", function($scope, $location, $rootScope, ModuleService, UsersService) {
+myApp.controller('CreateModuleController', ["$scope", "$location", "$rootScope", "ModuleService", "UsersService", '$http', function($scope, $location, $rootScope, ModuleService, UsersService, $http) {
     $scope.loggedInUser = UsersService.getLoggedInUser();
-    $scope.text = "module page"
-        // UsersService.getAllStudnets().success(function(studnets) {
-        // 	console.log(studnets)
-        // 	$scope.students = studnets	
-        // })
-
     $scope.newModule = {
         private: 'yes'
     };
-
+    $http.get('/api/modules/getMyModules/' + $scope.loggedInUser.id).success(function(res) {
+        console.log("my modules is ", res)
+        $scope.myModules = res
+    })
     $scope.createModule = function() {
         $scope.newModule.lecture = $scope.loggedInUser.id
-        console.log($scope.newModule)
         createModule($scope.newModule)
         window.location.href = '/'
     }
-
-
-
 }])
 
 myApp.controller('ModuleDetailsController', ["$scope", "$location", "$rootScope", "ModuleService", '$routeParams', '$http', "UsersService", 'Upload', '$window', function($scope, $location, $rootScope, ModuleService, $routeParams, $http, UsersService, Upload, $window) {
@@ -220,7 +214,6 @@ myApp.controller('ModuleDetailsController', ["$scope", "$location", "$rootScope"
         var importSectionItems = []
 
         Object.keys(dataId).forEach(function(dataIdItem) {
-            // console.log(dataIdItem + " / " + dataId[dataIdItem])
             if (dataId[dataIdItem]) {
                 importSectionItems.push({ id: dataIdItem, hidden: false })
             }
@@ -244,13 +237,11 @@ myApp.controller('ModuleDetailsController', ["$scope", "$location", "$rootScope"
     }
 
     $scope.unlink = function(sectionId) {
-        console.log(sectionId)
         var section = {
             lecture_id: loggedInUser.id,
             module_id: $routeParams.id,
             id: sectionId
         }
-
         unlinkSection(section)
 
     }
@@ -363,24 +354,19 @@ myApp.factory('ModuleService', ['$http', '$rootScope', "$location", "UsersServic
     }
     showFile = function(fileDetails) {
         $http.post('/api/sections/showFile', fileDetails)
-
     }
     hideFile = function(fileDetails) {
         $http.post('/api/sections/hideFile', fileDetails)
     }
     enrollStudent = function(studentDetails) {
         $http.post('/api/modules/enrollStudent', studentDetails)
-
     }
     removeStudent = function(studentDetails) {
         $http.post('/api/modules/removeStudent', studentDetails)
     }
-
     deleteSection = function(sectionDetails) {
-        console.log(sectionDetails)
         $http.post('/api/modules/removeSection', sectionDetails)
     }
-
     deleteModule = function(id) {
         $http.post('/api/modules/deleteModule', id)
     }
@@ -409,14 +395,13 @@ myApp.factory('ModuleService', ['$http', '$rootScope', "$location", "UsersServic
 
 
 //Course
-myApp.controller('CourseController', ["$scope", "$location", "$rootScope", function($scope, $location, $rootScope) {
+myApp.controller('CourseController', ["$scope", "$location", "$rootScope", '$window', function($scope, $location, $rootScope, $window) {
     $scope.text = "course page"
 }])
 
 //Login
 
-myApp.controller('UsersController', ['$scope', '$http', '$location', 'UsersService',
-    function($scope, $http, $location, UsersService) {
+myApp.controller('UsersController', ['$scope', '$http', '$location', 'UsersService' , '$window'	,function($scope, $http, $location, UsersService, $window) {
 
         var loggedInUser = null;
 
@@ -429,8 +414,10 @@ myApp.controller('UsersController', ['$scope', '$http', '$location', 'UsersServi
 
         $scope.login = function(userDetails) {
             login($scope.userDetails)
-            $window.location.path('/')
-            $scope.userDetails = '';
+            // $window.location.path('/')
+            console.log("logged")
+            // window.location.href = '/'
+            // $scope.userDetails = '';
         }
 
         $scope.remove = function(id) {
@@ -496,7 +483,7 @@ myApp.factory('UsersService', ['$http', '$window', '$rootScope', function($http,
                 role: payload.role
             };
         } else {
-            return null
+            return false;
         }
     };
 
@@ -521,6 +508,7 @@ myApp.factory('UsersService', ['$http', '$window', '$rootScope', function($http,
                 console.log(res.success)
 
                 saveToken(res.data.token)
+                 window.location.href = '/'
 
             } else {
                 logout();

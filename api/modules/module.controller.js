@@ -7,6 +7,8 @@ var config = require('./../../config/database')
 
 
 function handleError(res, err) {
+    console.log("result is", res)
+    console.log("error is ", err)
     return res.status(500).json(err);
 }
 
@@ -36,24 +38,55 @@ exports.index = function(req, res) {
 
 // Creates a new user in datastore.
 exports.create = function(req, res) {
-    console.log("create function", req.body)
-    console.log(req.body)
-    var module = {
-        name: req.body.name,
-        lecture: req.body.lecture,
-        sections: [],
-        students: [],
-        lecture_help: [],
-        hidden: req.body.private
-    };
-    Module.create(module, function(err, module) {
-        if (err) {
-            console.log(err)
-            return handleError(res, err);
-        }
+    console.log("create function", req.body.copy)
+    var module;
 
-        return res.json(201, module);
-    })
+    if (req.body.copy != null) {
+        Module.findById(req.body.copy._id, function(err, resModule) {
+            if (err) {
+                return handleError(resModule, err)
+            } else {
+
+                module = {
+                    name: req.body.name,
+                    lecture: req.body.lecture,
+                    sections: resModule.sections,
+                    students: resModule.students,
+                    lecture_help: resModule.lecture_help,
+                    hidden: req.body.private
+                };
+            }
+        }).then(function() {
+            Module.create(module, function(err, module) {
+                if (err) {
+                    console.log(err)
+                    return handleError(res, err);
+                }
+
+                return res.json(201, module);
+            })
+        })
+        console.log("yes")
+    } else {
+        module = {
+            name: req.body.name,
+            lecture: req.body.lecture,
+            sections: [],
+            students: [],
+            lecture_help: [],
+            hidden: req.body.private
+        };
+        Module.create(module, function(err, module) {
+            if (err) {
+                console.log(err)
+                return handleError(res, err);
+            }
+
+            return res.json(201, module);
+        })
+    }
+
+
 };
 
 
@@ -319,13 +352,13 @@ exports.removeSection = function(req, res) {
 
 }
 
-exports.deleteModule = function(req, res){
+exports.deleteModule = function(req, res) {
 
-    Module.remove({_id : req.body.id}, function(err, output){
+    Module.remove({ _id: req.body.id }, function(err, output) {
         console.log(err)
-        if(err){
+        if (err) {
             handleError(res, err)
-        }else{
+        } else {
             return res.status(200).json("module deleted")
         }
     })

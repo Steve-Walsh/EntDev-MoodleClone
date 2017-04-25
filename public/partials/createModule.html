@@ -1,47 +1,60 @@
-<div class="container" >
-  <div class="row">
-    <div class="col-md-8 col-md-offset-2" style="text-align: center">
-     <div class="panel panel-success">
-      <div class="panel-heading">
-        <div class="panel-title"> <h2>Create a New Module</h2>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2" style="text-align: center">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <div class="panel-title">
+                        <h2>Create a New Module</h2>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <form ng-submit="createModule()">
+                        <div class="form-group form-inline">
+                            <label>Name: </label>
+                            <input type="text" name="name" class="form-control" ng-model="newModule.name" required>
+                            <br>
+                        </div>
+                        <div class="form-group">
+                            <label>Private :</label>
+                            <label class="radio-inline">
+                                <input type="radio" ng-model="newModule.private" value="yes"> Yes
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" ng-model="newModule.private" value="no"> No
+                            </label>
+                            <br/>
+                        </div>
+                        <!-- {{myModules}} -->
+                        <span class="nullable">
+                        <select ng-model="newModule.copy" ng-options="module.name for module in myModules" class="form-control">
+                          <option value="">-- Choose Module --</option>
+                        </select>
+                      </span>
+                        <br/>
+       <!--                  <select class="form-control">
+                            <option ng-selected="newModule.copy" ng-repeat="option in myModules" value="{{option.id}}">{{option.name}}</option>
+                        </select> -->
+                        <div class="form-group">
+                            <input type="hidden" class="form-control" ng-model="newModule.lecture"></input>
+                        </div>
+                        <br>
+                        <button class="btn btn-lg btn-success btn-block" type="submit">Create new Module</button>
+                    </form>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="panel-body">
-<!--         <form  style="margin-top:30px;" ng-submit="createModule()">
-         <br> 
-         <div class="form-group">
-           <input type="text" class="form-control" placeholder="Module Name" ng-model="newModule.name" required="true"></input>
-         </div>
-
-         <br>  -->
-         <form ng-submit="createModule()">
-          <div class="form-group form-inline">
-            <label>Name:  </label><input type="text" name="name" class="form-control" ng-model="newModule.name" required>
-            <br>
-          </div>
-          <div class="form-group">
-            <label>Private :</label>
-            <label class="radio-inline">
-              <input type="radio" ng-model="newModule.private" value="yes">
-              Yes
-            </label>
-            <label class="radio-inline">
-              <input type="radio"  ng-model="newModule.private" value="no">
-              No
-            </label><br/>
-          </div>
-          <div class="form-group">
-            <input type="hidden" class="form-control" ng-model="newModule.lecture"></input>
-          </div>
-
-          <br> <button class="btn btn-lg btn-success btn-block" type="submit" >Create new Module</button>
-
-        </form>
-      </div>
     </div>
-  </div>
 </div>
-</div>
-
-
-
+<script>
+$(document).ready(function() {
+    $('select[name="inverse-dropdown"], select[name="inverse-dropdown-optgroup"], select[name="inverse-dropdown-disabled"]').select2({
+        dropdownCssClass: 'select-inverse-dropdown'
+    });
+    $('select[name="searchfield"]').select2({
+        dropdownCssClass: 'show-select-search'
+    });
+    $('select[name="inverse-dropdown-searchfield"]').select2({
+        dropdownCssClass: 'select-inverse-dropdown show-select-search'
+    });
+});
+</script>

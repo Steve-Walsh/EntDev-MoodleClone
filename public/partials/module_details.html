@@ -240,9 +240,9 @@
                 <hr>
                 <ul>
                     <div ng-repeat="file in section.sectionDetails.files | orderBy:'+name'">
-                        <li>
+                        <li ng-if="!file.hidden">
                             <a href="/api/sections/downloadFile/{{file._id}}" download="{{file.orgName}}">
-                                <img ng-src="./data/png/{{file.type}}.png" height="30px" /> {{file.orgName}} / {{file.hidden}}</a>
+                                <img ng-src="./data/png/{{file.type}}.png" height="30px" /> {{file.orgName}}</a>
                         </li>
                     </div>
                 </ul>

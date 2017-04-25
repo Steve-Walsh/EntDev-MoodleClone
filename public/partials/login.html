@@ -1,26 +1,22 @@
-<div class="container">
-	<br>
-	<br>
-	<br>
-	<div class="panel panel-success  col-md-4 col-md-offset-7">
-		<div class="panel-heading">
-			<div class="panel-title" style="text-align: center;"> <h2> Login </h2>
-			</div>
-		</div>
+<div class="container">        
+<div class="col-md-5 col-md-offset-4" style="text-align: center">
 
-		<div class="panel-body">
-			<form  ng-submit="login()" style="margin-top:30px;">
-
-
-				<br> 
-				<input type="text" class="form-control" placeholder="Email" ng-model="userDetails.email" required="true"></input>
-
-				<br>
-				<input type="password" class="form-control" placeholder="Password" ng-model="userDetails.password" required="true"></input>
-
-				<br> <button class="btn btn-lg btn-success btn-block" type="submit ">Sign in</button>
-			</form>
-			<br> <a class="btn btn-lg btn-success btn-block" role="button" href="#/signup">or sign up</a>
-		</div>
-	</div>
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <div class="panel-title" style="text-align: center;">
+                <h2> Login </h2>
+            </div>
+        </div>
+        <div class="panel-body">
+            <form ng-submit="login()" style="margin-top:30px;">
+                <br>
+                <input type="text" class="form-control" placeholder="Username" ng-model="userDetails.email" required="true"></input>
+                <br>
+                <input type="password" class="form-control" placeholder="Password" ng-model="userDetails.password" required="true"></input>
+                <br>
+                <button class="btn btn-lg btn-success btn-block" type="submit">Sign in</button>
+            </form>
+            <br> <a class="btn btn-lg btn-success btn-block" role="button" href="#/register">or sign up</a>
+        </div>
+    </div>
 </div>

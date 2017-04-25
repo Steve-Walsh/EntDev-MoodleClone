@@ -25,33 +25,34 @@
     <nav class="navbar navbar-inverse" ng-controller="MainController">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="#/" ">Moodle</a>
+                <a class="navbar-brand" href="#/"">Moodle</a>
           </div>
-    <ul class="nav navbar-nav navbar-right collapse navbar-collapse " action="# " role="search ">
-      <li class="dropdown " ng-if="loggedInUser.name !=null ">
-        <a class="dropdown-toggle " data-toggle="dropdown ">{{loggedInUser.name}} <b class="caret "></b></a>
-        <span class="dropdown-arrow "></span>
-        <ul class="dropdown-menu ">
-          <li><a ng-click="logout() ">Logout</a></li>
+    <ul class="nav navbar-nav navbar-right collapse navbar-collapse" action="#" role="search">
+      <li class="dropdown" ng-if="loggedInUser.name !=null">
+        <a class="dropdown-toggle" data-toggle="dropdown">{{loggedInUser.name}} <b class="caret"></b></a>
+        <span class="dropdown-arrow"></span>
+        <ul class="dropdown-menu">
+          <li><a ng-click="logout()">Logout</a></li>
         </ul>      
       </ul>
       </nav>
 
-      <div class="container-fluid text-center ">    
-        <div class="row content ">
-          <div class="col-sm-2 sidenav " ng-controller="MainController " >
+      <div class="container-fluid text-center">    
+        <div class="row content">
+          <div class="col-sm-2 sidenav" ng-controller="MainController" >
+          <div ng-if="loggedInUser.name !=null">
             <p>Modules</p>
-            <div ng-repeat="module in modules "> 
-              <br><a href="#/module/{{module._id}} ">{{module.name}}</a>
+            <div ng-repeat="module in modules"> 
+              <br><a href="#/module/{{module._id}}">{{module.name}}</a>
             </div>
             <hr>
 
-            <a href=" " class="btn btn-lg btn-primary btn-block ">Create new Course</a>
-            <a href="#/createModule " class="btn btn-lg btn-primary btn-block ">Create new Module</a>
+            <!-- <a href="" class="btn btn-lg btn-primary btn-block">Create new Course</a> -->
+            <a href="#/createModule" class="btn btn-lg btn-primary btn-block" ng-if="loggedInUser.role == 'lecture'">Create new Module</a>
           </div>
 
-
-          <div class="col-sm-8 text-left "> 
+          </div>
+          <div class="col-sm-8 text-left"> 
             <div ng-view ></div> 
           </div>
 

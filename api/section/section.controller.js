@@ -61,15 +61,8 @@ exports.destroy = function(req, res) {
 };
 
 exports.uploadFile = function(req, res) {
-
-    // console.log(req.file);
-    console.log("BODY", req.body);
-    console.log(req.file)
-
     var type = req.file.originalname.split(".")
     type = type[type.length - 1]
-
-
     Section.findOneAndUpdate({ _id: req.body.section_id }, {
         $push: {
             files: {
@@ -85,8 +78,6 @@ exports.uploadFile = function(req, res) {
         if (err) {
             return handleError(res, err);
         }
-        console.log(secRes)
-
         return res.redirect('/#/module/' + req.body.module_id)
     });
 
@@ -94,17 +85,11 @@ exports.uploadFile = function(req, res) {
 
 exports.downloadFile = function(req, res) {
     var path = require('path');
-
-    console.log("REQ", req.params);
-
     Section.findOne({ "files._id": req.params.id }, { "files.$.": true }).exec(function(err, data) {
         if (err) {
             return handleError(res, err);
         }
-        console.log(data.files[0].location)
-
         res.setHeader('Content-Type', data.files[0].mimetype);
-
         res.sendFile(path.resolve(__dirname + '/../../public/data/files/' + data.files[0].newName), data.files[0].orgName)
     })
 
@@ -158,4 +143,3 @@ exports.hideFile = function(req, res) {
             console.log(output)
         });
 }
-
